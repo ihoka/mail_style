@@ -258,4 +258,18 @@ describe 'Inline styles' do
       should match(/<style data-immutable="true"/)
     end
   end
+  
+  describe "handling invalid styles" do
+    let(:email) { TestMailer.deliver_test_inline_rules("<style> .text=\n { color: #f00; } </style>") }
+    subject     { html_part(email) }
+    
+    it "does not inline styles if style parsing fails" do
+      should match(/<p class="text">/)
+    end
+    
+    it "logs the error using ActionMailer's logger" do
+      TestMailer.logger.should_receive(:error).with(Spec::Mocks::ArgumentMatchers::RegexpMatcher.new(/Error parsing mail styles/))
+      subject
+    end
+  end
 end

@@ -8,7 +8,11 @@ module MailStyle
     
     module InstanceMethods
       def create_mail_with_inline_styles
-        write_inline_styles
+        begin
+          write_inline_styles
+        rescue Nokogiri::CSS::SyntaxError => e
+          logger.error("Error parsing mail styles: #{e.message}")
+        end
         create_mail_without_inline_styles
       end
       

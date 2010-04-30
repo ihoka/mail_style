@@ -1,26 +1,32 @@
 $: << File.dirname(__FILE__) + '/../lib'
- 
+
+require 'logger'
+require 'tempfile'
 require 'rubygems'
 require 'spec'
 require 'action_mailer'
 require 'mail_style'
 
-def flatten_parts(parts)
-  nested = !parts.empty? ? parts.map { |p| flatten_parts(p.parts) }.flatten : []
-  [parts, nested].flatten
-end
-
-# Extract HTML Part
-def html_part(email)
-  flatten_parts(email.parts).select{|part| part.content_type == 'text/html'}.first.body
-end
-
-def css_rules(css)
-  @css_rules = css
+Spec::Runner.configure do |config|
+  ActionMailer::Base.logger = Logger.new(Tempfile.new("mail_style"))
   
-  # Stubs
-  File.stub(:exist?).and_return(true)
-  File.stub(:read).and_return(@css_rules)
+  def flatten_parts(parts)
+    nested = !parts.empty? ? parts.map { |p| flatten_parts(p.parts) }.flatten : []
+    [parts, nested].flatten
+  end
+
+  # Extract HTML Part
+  def html_part(email)
+    flatten_parts(email.parts).select{|part| part.content_type == 'text/html'}.first.body
+  end
+
+  def css_rules(css)
+    @css_rules = css
+  
+    # Stubs
+    File.stub(:exist?).and_return(true)
+    File.stub(:read).and_return(@css_rules)
+  end
 end
 
 # Debugging helper

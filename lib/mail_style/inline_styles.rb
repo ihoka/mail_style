@@ -5,7 +5,8 @@ require 'css_parser'
 module MailStyle
   module InlineStyles
     DOCTYPE = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
-
+    STYLE_SPLITTER = /([^:]*):(.*)/
+    
     module InstanceMethods
       def create_mail_with_inline_styles
         begin
@@ -59,7 +60,8 @@ module MailStyle
           html_document.css(selector).each do |element|
             declaration.to_s.split(';').each do |style|
               # Split style in attribute and value
-              attribute, value = style.split(':').map(&:strip)
+              match = style.match(STYLE_SPLITTER)
+              attribute, value = match[1].strip, match[2].strip
 
               # Set element style defaults
               element_styles[element] ||= {}

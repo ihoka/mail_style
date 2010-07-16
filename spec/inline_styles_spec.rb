@@ -15,7 +15,7 @@ class TestMailer < ActionMailer::Base
   def test_multipart(css_file = nil)
     setup_email(css_file)
     content_type 'multipart/alternative'
-    part :content_type => 'text/html', :body => '<p class="text">Hello <a href="htt://example.com/">World</a></p>'
+    part :content_type => 'text/html', :body => '<p class="text">Hello <a href="htt://example.com/">World</a></p><div class="absolute_url_bg"></div>'
     part :content_type => 'text/plain', :body => 'Hello World'
   end
   
@@ -23,7 +23,7 @@ class TestMailer < ActionMailer::Base
     setup_email(css_file)
     content_type "multipart/mixed"
     part :content_type => "multipart/alternative", :content_disposition => "inline" do |p|
-      p.part :content_type => 'text/html', :body => '<p class="text">Hello World</p>'
+      p.part :content_type => 'text/html', :body => '<p class="text">Hello World</p><div class="absolute_url_bg"></div>'
       p.part :content_type => 'text/plain', :body => 'Hello World'
     end
   end
@@ -31,7 +31,7 @@ class TestMailer < ActionMailer::Base
   def test_inline_rules(rules)
     setup_email(nil)
     content_type 'multipart/alternative'
-    part :content_type => 'text/html', :body => "#{rules}<p class=\"text\">Hello World</p>"
+    part :content_type => 'text/html', :body => %{#{rules}<p class="text">Hello World</p>}
     part :content_type => 'text/plain', :body => 'Hello World'
   end
   
@@ -72,6 +72,7 @@ shared_examples_for "inline styles" do
       body { background: #000 }
       .text { color: #0f0; font-size: 14px }
       p { color: #f00; line-height: 1.5 }
+      .absolute_url_bg { background-image: url(http://custom.example.com/email_bg.png); }
     EOF
   end
   
@@ -104,6 +105,10 @@ shared_examples_for "inline styles" do
     expect do
       subject
     end.to_not raise_error(StandardError)
+  end
+  
+  it "should keep existing absolute URLs in styles" do
+    should match(%r{<div class="absolute_url_bg" style="background-image: url\(http://custom.example.com/email_bg.png\)"})
   end
 end
 

@@ -148,7 +148,7 @@ module MailStyle
       def update_image_urls(style)
         if default_url_options[:host].present?
           # Replace urls in stylesheets
-          style.gsub!($1, absolutize_url($1, 'stylesheets')) if style[/url\(['"]?(.*)['"]?\)/i]
+          style.gsub!($1, absolutize_url($1, 'stylesheets')) if style[/url\(['"]?(.*?)['"]?\)/i]
         end
 
         style
